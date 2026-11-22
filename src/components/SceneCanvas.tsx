@@ -7,15 +7,16 @@ interface Props {
   step: number;
   playing: boolean;
   reduced: boolean;
+  simplified: boolean;
   label: string;
 }
 
-export function SceneCanvas({ viz, step, playing, reduced, label }: Props) {
+export function SceneCanvas({ viz, step, playing, reduced, simplified, label }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const simRef = useRef<unknown>(null);
   const timeRef = useRef(0);
-  const propsRef = useRef({ step, playing, reduced, viz });
-  propsRef.current = { step, playing, reduced, viz };
+  const propsRef = useRef({ step, playing, reduced, simplified, viz });
+  propsRef.current = { step, playing, reduced, simplified, viz };
 
   useEffect(() => {
     timeRef.current = reduced ? 6 : 0;
@@ -53,6 +54,7 @@ export function SceneCanvas({ viz, step, playing, reduced, label }: Props) {
         w,
         h,
         reduced: props.reduced,
+        simplified: props.simplified,
       };
       if (props.playing && !props.reduced) props.viz.tick(simRef.current, input);
       props.viz.draw(context, simRef.current, input);
@@ -100,7 +102,7 @@ export function SceneCanvas({ viz, step, playing, reduced, label }: Props) {
       resize.disconnect();
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [viz, step, playing, reduced]);
+  }, [viz, step, playing, reduced, simplified]);
 
   return (
     <div className="stage-frame">

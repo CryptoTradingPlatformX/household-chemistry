@@ -607,12 +607,12 @@ function hex(value: string): { r: number; g: number; b: number } {
 }
 
 export function drawMicelle(ctx: CanvasRenderingContext2D, x: number, y: number, filled: boolean): void {
-  for (let i = 0; i < 8; i++) {
-    const angle = (i / 8) * Math.PI * 2;
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
     ctx.save();
-    ctx.translate(x + Math.cos(angle) * 28, y + Math.sin(angle) * 28);
+    ctx.translate(x + Math.cos(angle) * 42, y + Math.sin(angle) * 42);
     ctx.rotate(angle);
-    drawMol(ctx, "soap", 0, 0, 0, 0.45);
+    drawMol(ctx, "soap", 0, 0, 0, 0.7);
     ctx.restore();
   }
   if (filled) drawMol(ctx, "oil", x, y, 0, 0.55);
@@ -622,17 +622,17 @@ export function drawChain(ctx: CanvasRenderingContext2D, x: number, y: number, f
   ctx.strokeStyle = "rgba(247,244,238,0.45)";
   ctx.lineWidth = 3;
   ctx.beginPath();
-  const n = 8;
+  const n = 4;
   for (let i = 0; i < n; i++) {
-    const px = folded ? x + Math.cos(i + time) * 16 : x - 50 + i * 14;
-    const py = folded ? y + Math.sin(i * 1.3) * 16 : y + Math.sin(i) * 4;
+    const px = folded ? x + Math.cos(i + time) * 28 : x - 70 + i * 36;
+    const py = folded ? y + Math.sin(i * 1.3) * 22 : y + Math.sin(i) * 6;
     if (i === 0) ctx.moveTo(px, py);
     else ctx.lineTo(px, py);
   }
   ctx.stroke();
   for (let i = 0; i < n; i++) {
-    const px = folded ? x + Math.cos(i + time) * 16 : x - 50 + i * 14;
-    const py = folded ? y + Math.sin(i * 1.3) * 16 : y + Math.sin(i) * 4;
-    drawMol(ctx, i % 2 ? "h2o" : "glucose", px, py, 0, 0.28);
+    const px = folded ? x + Math.cos(i + time) * 28 : x - 70 + i * 36;
+    const py = folded ? y + Math.sin(i * 1.3) * 22 : y + Math.sin(i) * 6;
+    drawMol(ctx, i % 2 ? "h2o" : "glucose", px, py, 0, 0.55);
   }
 }

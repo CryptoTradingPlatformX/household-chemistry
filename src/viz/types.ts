@@ -5,6 +5,8 @@ export interface VizInput {
   w: number;
   h: number;
   reduced: boolean;
+  /** Skeleton with CH₃ / OH labels instead of a sphere for every hydrogen. */
+  simplified: boolean;
 }
 
 export interface Viz<S> {

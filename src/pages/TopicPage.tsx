@@ -8,6 +8,7 @@ import { LINES } from "../content/lines";
 import { SPECIES, type ElementSymbol } from "../content/species";
 import { topicById, topicsInRoom } from "../content/topics";
 import { DISCLAIMER, ROOMS, type Topic } from "../content/types";
+import { useAtomStyle } from "../hooks/useAtomStyle";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { siteHref } from "../lib/route";
 import type { Viz } from "../viz/types";
@@ -39,6 +40,7 @@ function elementsFor(topic: Topic): ElementSymbol[] {
 export default function TopicPage({ id }: { id: string }) {
   const topic = topicById(id);
   const reduced = useReducedMotion();
+  const [atomStyle, setAtomStyle] = useAtomStyle();
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(!reduced);
   const [viz, setViz] = useState<Viz<unknown> | null>(null);
@@ -111,6 +113,7 @@ export default function TopicPage({ id }: { id: string }) {
             step={step}
             playing={playing}
             reduced={reduced}
+            simplified={atomStyle === "simplified"}
             label={`${topic.title}. ${current.title}. ${current.caption}`}
           />
         ) : (
@@ -131,6 +134,14 @@ export default function TopicPage({ id }: { id: string }) {
           <p className="step-count">
             Step {step + 1} of {topic.steps.length}
           </p>
+        </div>
+        <div className="toggle" role="group" aria-label="How hydrogens are drawn">
+          <button type="button" aria-pressed={atomStyle === "all"} onClick={() => setAtomStyle("all")}>
+            All atoms
+          </button>
+          <button type="button" aria-pressed={atomStyle === "simplified"} onClick={() => setAtomStyle("simplified")}>
+            Simplified
+          </button>
         </div>
         <div className="dots">
           {topic.steps.map((item, index) => (
