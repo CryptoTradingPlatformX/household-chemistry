@@ -22,9 +22,9 @@ export const ART: Record<string, TopicArt> = {
   maillard: {
     macro: "skillet",
     steps: [
-      { label: "Sugar meets amino acid", mols: ["glucose", "nh3", "h2o"], morph: ["dye", "h2o", "h2o"], mood: "heat" },
-      { label: "Rearrangement", mols: ["dye", "dye", "h2o"], mood: "heat" },
-      { label: "Aroma and brown mix", mols: ["co2", "ethanol", "dye"], morph: ["dye", "c", "co2"], mood: "heat" },
+      { label: "Sugar meets amino acid", mols: ["glucose", "lysine", "h2o"], morph: ["glycosyl", "h2o"], mood: "heat" },
+      { label: "Rearrangement", mols: ["glycosyl", "h2o"], mood: "heat" },
+      { label: "Aroma and brown mix", mols: ["acetaldehyde", "co2", "alanine"], morph: ["acetaldehyde", "co2"], mood: "heat" },
     ],
   },
   caramel: {
@@ -40,10 +40,10 @@ export const ART: Record<string, TopicArt> = {
     macro: "apple",
     steps: [
       { label: "Oxygen arrives", mols: ["o2", "h2o", "o2"] },
-      { label: "Enzyme at work", mols: ["o2", "glucose", "dye"], morph: ["dye", "h2o", "dye"] },
-      { label: "Brown pigments", mols: ["dye", "melanin", "dye"] },
-      { label: "Vitamin C", mols: ["glucose", "dye", "h2o"], morph: ["glucose", "h2o", "h2o"] },
-      { label: "Citric acid", mols: ["acetic", "h", "h2o"] },
+      { label: "Enzyme at work", mols: ["o2", "catechol"], morph: ["quinone", "h2o"] },
+      { label: "Brown pigments", mols: ["quinone", "quinone"] },
+      { label: "Vitamin C", mols: ["ascorbic", "quinone"], morph: ["catechol", "h2o"] },
+      { label: "Citric acid", mols: ["citric", "h", "h2o"] },
     ],
   },
   "boiling-egg": {
@@ -151,7 +151,7 @@ export const ART: Record<string, TopicArt> = {
     macro: "hair",
     steps: [
       { label: "Alkaline swell", mols: ["nh3", "oh", "h2o"] },
-      { label: "Melanin lightens", mols: ["melanin", "h2o2"], morph: ["dye", "h2o", "o2"] },
+      { label: "Melanin lightens", mols: ["dhi", "h2o2"], morph: ["melanin", "h2o", "o2"] },
       { label: "Dye precursor", mols: ["dye", "h2o2", "n2"] },
       { label: "Color built inside", mols: ["dye", "dye", "h2o"], mood: "glow" },
     ],
@@ -159,9 +159,9 @@ export const ART: Record<string, TopicArt> = {
   sunscreen: {
     macro: "skin",
     steps: [
-      { label: "Absorbing UV", mols: ["dye", "photon", "c"], mood: "uv" },
-      { label: "Energy as heat", mols: ["dye", "photon"], morph: ["dye", "h2o"], mood: "heat" },
-      { label: "UVA filter", mols: ["dye", "photon", "c"], mood: "uv" },
+      { label: "Absorbing UV", mols: ["oxy", "photon"], mood: "uv" },
+      { label: "Energy as heat", mols: ["oxy", "photon"], morph: ["oxy"], mood: "heat" },
+      { label: "UVA filter", mols: ["oxy", "photon"], mood: "uv" },
       { label: "Mineral particles", mols: ["zno", "tio2", "photon"], mood: "uv" },
     ],
   },

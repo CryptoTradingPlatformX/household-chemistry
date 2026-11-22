@@ -1,6 +1,6 @@
-import { backdrop, drawMol, labelPill, type Mood } from "./draw";
+import { backdrop, drawMol, labelPill, setSimplifiedDraw, type Mood } from "./draw";
 import { drawChain, drawMacro, drawMicelle, type MacroKind } from "./macros";
-import type { MolId } from "./mols";
+import { totalAtoms, type MolId } from "./mols";
 import { contain, integrate, type Molecule, type Viz } from "./types";
 
 export interface CastStep {
@@ -42,7 +42,9 @@ function build(art: TopicArt, step: number, w: number, h: number): Sim {
   const cast = art.steps[Math.min(step, art.steps.length - 1)];
   const top = h * 0.54;
   const particles: Particle[] = [];
-  const count = Math.max(cast.mols.length, 6);
+  const heaviest = Math.max(...cast.mols.map((id) => totalAtoms(id)));
+  const cap = heaviest > 28 ? 2 : heaviest > 14 ? 3 : 5;
+  const count = Math.min(cap, Math.max(cast.mols.length, cap >= 5 ? 4 : cast.mols.length));
   for (let i = 0; i < count; i++) {
     const mol = cast.mols[i % cast.mols.length];
     const col = i % 3;
@@ -109,6 +111,7 @@ export function createTopicViz(art: TopicArt): Viz<Sim> {
     draw(ctx, state, input) {
       const cast = art.steps[Math.min(input.step, art.steps.length - 1)];
       const progress = input.reduced ? 1 : Math.min(1, input.time / 5);
+      setSimplifiedDraw(input.simplified);
       backdrop(ctx, input.w, input.h, cast.mood ?? "neutral");
       drawMacro(ctx, {
         kind: art.macro,

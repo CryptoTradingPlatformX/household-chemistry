@@ -2,6 +2,24 @@ import { ELECTRON_COLOR, ELEMENT_COLORS } from "../content/colors";
 import type { ElementSymbol } from "../content/species";
 import { MOLS, isElectron, type Geom, type MolId } from "./mols";
 
+const SUB = "₀₁₂₃₄₅₆₇₈₉";
+
+let simplifiedDraw = false;
+
+export function setSimplifiedDraw(value: boolean): void {
+  simplifiedDraw = value;
+}
+
+function subscript(value: number): string {
+  return String(value).replace(/\d/g, (digit) => SUB[Number(digit)] ?? digit);
+}
+
+function groupLabel(element: string, hydrogens: number): string {
+  if (hydrogens <= 0) return element;
+  if (hydrogens === 1) return `${element}H`;
+  return `${element}H${subscript(hydrogens)}`;
+}
+
 const sprites = new Map<string, HTMLCanvasElement>();
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
@@ -124,44 +142,85 @@ export function drawMol(ctx: CanvasRenderingContext2D, id: MolId, x: number, y: 
     ctx.restore();
     return;
   }
-  const geom = MOLS[id] as Geom;
+  const geom = MOLS[id as keyof typeof MOLS] as Geom;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const atom of geom.atoms) {
+    minX = Math.min(minX, atom.x);
+    minY = Math.min(minY, atom.y);
+    maxX = Math.max(maxX, atom.x);
+    maxY = Math.max(maxY, atom.y);
+  }
+  const span = Math.max(24, maxX - minX, maxY - minY);
+  const fit = Math.min(1, 72 / span);
+  const drawScale = scale * fit;
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
   const pts = geom.atoms.map((atom) => ({
     ...atom,
-    px: x + (atom.x * cos - atom.y * sin) * scale,
-    py: y + (atom.x * sin + atom.y * cos) * scale,
+    px: x + (atom.x * cos - atom.y * sin) * drawScale,
+    py: y + (atom.x * sin + atom.y * cos) * drawScale,
   }));
+  const hydrogensOn = new Map<number, number>();
+  if (simplifiedDraw) {
+    geom.atoms.forEach((atom) => {
+      if (atom.el === "H" && atom.parent !== undefined) {
+        hydrogensOn.set(atom.parent, (hydrogensOn.get(atom.parent) ?? 0) + 1);
+      }
+    });
+  }
   if (geom.halo) {
     ctx.beginPath();
     ctx.fillStyle = geom.halo;
-    ctx.arc(x, y, 22 * scale, 0, Math.PI * 2);
+    ctx.arc(x, y, 22 * drawScale, 0, Math.PI * 2);
     ctx.fill();
   }
+  for (const stub of geom.stubs ?? []) {
+    const x1 = x + (stub.x1 * cos - stub.y1 * sin) * drawScale;
+    const y1 = y + (stub.x1 * sin + stub.y1 * cos) * drawScale;
+    const x2 = x + (stub.x2 * cos - stub.y2 * sin) * drawScale;
+    const y2 = y + (stub.x2 * sin + stub.y2 * cos) * drawScale;
+    bond(ctx, x1, y1, x2, y2, 2 * drawScale);
+  }
   for (const link of geom.bonds) {
+    if (simplifiedDraw && (pts[link.a].el === "H" || pts[link.b].el === "H")) continue;
     const a = pts[link.a];
     const b = pts[link.b];
     const order = link.order ?? 1;
-    if (order === 1) bond(ctx, a.px, a.py, b.px, b.py, 2.4 * scale);
+    if (order === 1) bond(ctx, a.px, a.py, b.px, b.py, 2.4 * drawScale);
     else {
       const dx = b.px - a.px;
       const dy = b.py - a.py;
       const len = Math.hypot(dx, dy) || 1;
-      const ox = (-dy / len) * 2.6 * scale;
-      const oy = (dx / len) * 2.6 * scale;
-      bond(ctx, a.px + ox, a.py + oy, b.px + ox, b.py + oy, 2 * scale);
-      bond(ctx, a.px - ox, a.py - oy, b.px - ox, b.py - oy, 2 * scale);
-      if (order === 3) bond(ctx, a.px, a.py, b.px, b.py, 2 * scale);
+      const ox = (-dy / len) * 2.6 * drawScale;
+      const oy = (dx / len) * 2.6 * drawScale;
+      bond(ctx, a.px + ox, a.py + oy, b.px + ox, b.py + oy, 2 * drawScale);
+      bond(ctx, a.px - ox, a.py - oy, b.px - ox, b.py - oy, 2 * drawScale);
+      if (order === 3) bond(ctx, a.px, a.py, b.px, b.py, 2 * drawScale);
     }
   }
-  for (const atom of pts) {
+  pts.forEach((atom, index) => {
+    if (simplifiedDraw && atom.el === "H" && atom.parent !== undefined) return;
     const style = ELEMENT_COLORS[atom.el];
-    const radius = (atom.r ?? 10) * scale;
-    drawAtom(ctx, atom.px, atom.py, radius, style.color);
-    if (scale > 0.72 && radius > 6) {
-      letter(ctx, atom.px, atom.py, atom.el, style.ink, Math.min(11, radius * 0.85) * Math.min(scale, 1.1));
+    const radius = (atom.r ?? 10) * drawScale;
+    drawAtom(ctx, atom.px, atom.py, Math.max(3.5, radius), style.color);
+    const hydrogens = hydrogensOn.get(index) ?? 0;
+    const text = simplifiedDraw ? groupLabel(atom.el, hydrogens) : atom.el;
+    const fontSize = simplifiedDraw && hydrogens > 0 ? Math.max(8, Math.min(12, radius)) : Math.min(11, radius * 0.9);
+    if (fontSize >= 7) {
+      if (simplifiedDraw && hydrogens > 0) {
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "rgba(18, 10, 8, 0.9)";
+        ctx.font = `700 ${fontSize}px "Atkinson Hyperlegible", "Segoe UI", sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.strokeText(text, atom.px, atom.py);
+      }
+      letter(ctx, atom.px, atom.py, text, simplifiedDraw && hydrogens > 0 ? "#fffaf4" : style.ink, fontSize);
     }
-  }
+  });
 }
 
 export function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {

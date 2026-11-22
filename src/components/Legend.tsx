@@ -18,7 +18,7 @@ export function Legend({ symbols }: { symbols?: readonly (ElementSymbol | "e")[]
         ))}
       </ul>
       <p className="legend-note">
-        Letters sit on the atoms. A gold speck is an electron. Long chains are drawn shorter than the formula so the shape fits.
+        Letters sit on the atoms. A gold speck is an electron. All atoms draws every hydrogen as its own sphere, so you can count them against the formula. Simplified keeps those same hydrogens and prints them on the atom they belong to, as CH₃ or OH, when a full sphere for each one would crowd the picture.
       </p>
     </div>
   );
